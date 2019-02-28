@@ -55,7 +55,7 @@ This project should be considered **beta**. Proceed with caution if you decide
 to use Envelopes in production.
 
 Envelopes has been developed and tested with Python 2.7. Currently, Envelopes
-supports Python 2.6, 2.7 and 3.3.
+supports Python 2.6, 2.7, 3.3 and above.
 
 Author
 ------
