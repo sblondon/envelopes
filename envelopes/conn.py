@@ -79,15 +79,16 @@ class SMTP(object):
         if self._login:
             self._conn.login(self._login, self._password or '')
 
-    def send(self, envelope):
+    def send(self, envelope, return_path=None):
         """Sends an *envelope*."""
         if not self.is_connected:
             self._connect()
 
         msg = envelope.to_mime_message()
+        smtp_from = return_path or msg["From"]
         to_addrs = [envelope._addrs_to_header([addr]) for addr in envelope._to + envelope._cc + envelope._bcc]
 
-        return self._conn.sendmail(msg['From'], to_addrs, msg.as_string())
+        return self._conn.sendmail(smtp_from, to_addrs, msg.as_string())
 
 
 class GMailSMTP(SMTP):

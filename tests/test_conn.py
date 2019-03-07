@@ -139,3 +139,38 @@ class Test_SMTPConnection(BaseTestCase):
         assert call_args[0] == mime_msg['From']
         assert call_args[1] == [envelope._addrs_to_header([addr]) for addr in envelope._to + envelope._cc + envelope._bcc]
         assert call_args[2] != ''
+
+    def test_send(self):
+        conn = SMTP('localhost')
+
+        msg = self._dummy_message()
+        envelope = Envelope(**msg)
+        mime_msg = envelope.to_mime_message()
+
+        conn.send(envelope)
+        assert conn._conn is not None
+        assert len(conn._conn._call_stack.get('sendmail', [])) == 1
+
+        call_args = conn._conn._call_stack['sendmail'][0][0]
+        assert len(call_args) == 3
+        assert call_args[0] == mime_msg['From']
+        assert call_args[1] == [envelope._addrs_to_header([addr]) for addr in envelope._to + envelope._cc + envelope._bcc]
+        assert call_args[2] != ''
+
+    def test_send_with_return_path(self):
+        conn = SMTP('localhost')
+
+        msg = self._dummy_message()
+        envelope = Envelope(**msg)
+        mime_msg = envelope.to_mime_message()
+        FROM_USED_BY_SMTP = "returnpath@domain.tld"
+
+        conn.send(envelope, FROM_USED_BY_SMTP)
+        assert conn._conn is not None
+        assert len(conn._conn._call_stack.get('sendmail', [])) == 1
+
+        call_args = conn._conn._call_stack['sendmail'][0][0]
+        assert len(call_args) == 3
+        assert call_args[0] == FROM_USED_BY_SMTP
+        assert call_args[1] == [envelope._addrs_to_header([addr]) for addr in envelope._to + envelope._cc + envelope._bcc]
+        assert call_args[2] != ''
